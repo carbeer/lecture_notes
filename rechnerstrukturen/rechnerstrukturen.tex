@@ -1,6 +1,6 @@
 \chapter{Rechnerstrukturen}
 
-Zusammenfassung der Vorlesung "`Rechnerstrukturen"' aus dem Sommersemester 2016.\footnote{\url{https://capp.itec.kit.edu/teaching/rs/}}
+Zusammenfassung der Vorlesung "`Rechnerstrukturen"' aus dem Sommersemester 2016, geupdated füe .\footnote{\url{https://capp.itec.kit.edu/teaching/rs/}}
 
 \section{Grundlagen}
 
@@ -11,6 +11,17 @@ Entwurf einer Rechneranlage: Ingenieurmäßige Aufgabe der Kompromissfindung zwi
 \subsection{Entwurf von Rechneranlagen - Entwurfsfragen}
 
 \begin{itemize}
+	\item \textbf{Heutige Kennzahlen}
+	\begin{itemize}
+		\item Höchstleistungsrechner: Exa-FLOPs ($10^{18}$)
+		\item Intel Skylake-Prozessoren: 8 Mrd. Transistoren
+		\item Strukturbreite: 10nm 
+	\end{itemize}
+	\item \textbf{Prozessortypen}
+	\begin{itemize}
+		\item Multicore/Manycore
+		\item Anwendungsspezifisch, bspw. Google TPUs 
+	\end{itemize}
 	\item \textbf{Zielsetzung}
 	\begin{itemize}
 		\item Einsatzgebiet
@@ -88,6 +99,46 @@ Weltweite Forschungsaktivitäten bzgl. ExaScale-Rechner
 \end{itemize}
 
 
+\subsection{Effizienter Entwurf - Grundlagen}
+\begin{itemize}
+	\item Mobile Geräte: Verfügbare Energiemenge durch Batterien und Akkus begrenzt \(\rightarrow\) vorhandene Energie möglichst lange ausnutzen sowie Vermeidung von Überhitzung
+	\item HPC: Hohe Temperaturen begrenzen die Verarbeitungsgeschwindigkeit und die beeinflussen die Zuverlässigkeit
+	\item \textbf{CMOS-Schaltung}
+	\begin{itemize}
+		\item MOSFET: Je nach Spannung am Gate und dem daraus resultierenden Feld im Kanal können Ladungsträger den Kanal passieren oder nicht. Extrem niedrige Stromaufnahme im Ruhezustand
+		\item Leistungsaufnahme: \(P_{total} = P_{switching} + P_{shortcircuit} + P_{static} + P_{leakage}\)
+		\begin{itemize}
+			\item Statischer Leistungsverbrauch: \(P_{static}\) sowie Leistungsverbauch $(P_{leakage}$ bei Kriechströmen
+			\item Verbrauch bei Zustandsänderung: \(P_{switching}=C_{eff}*V_{dd}^2*f\) sowie Verbrauch während des Übergangs am Ausgang, wenn sich die Eingänge ändern \(P_{shortciruit}=I_{mean}*V_{dd}\) 
+			\item Höhere Frequenzen erfordern steilere Taktflaken \(\rightarrow\) schnelleres Laden von \(C_{eff}\) \(\rightarrow\) höhere Versorgungsspannung 
+			\item \(P \sim f und P \sim V_{dd}^2\) aber da $f \sim V_{dd}^2 \Rightarrow P \sim V_{dd}^3 $ und $P \sim f^3$
+			\item Energieverbrauch pro Aufgabe ist unabhängig von Frequenz, bzw. sogar negativ korreliert wegen statischer Ströme		
+		\end{itemize}
+		\item Schaltwahrscheinlichkeit
+
+		\begin{itemize}
+			\item \(\mathbb{P}_{Schalt} = 2 \cdot \mathbb{P}_{Ausgang(1)} \cdot (1-\mathbb{P}_{Ausgang}(1))\)
+			\item \(\mathbb{P}_{Ausgang}(1) = \mathbb{P}_{Eingang1}(0) \cdot \mathbb{P}_{Eingang2}(1) + \mathbb{P}_{Eingang1}(1) \cdot \mathbb{P}_{Eingang2}(0)\)
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{Kosten von Prozessoren}
+\begin{itemize}
+	\item \textbf{Ziel}
+	\begin{itemize}
+		\item Leistungsaufnahme senken ohne Verarbeitungsgeschwindigkeit zu beeinträchtigen
+		\item Optimierung der Systemarchitektur
+		\item Spezialisierte Prozessorkerne/Multicore-CPUs, die Parallelverarbeitung erlauben, verwenden
+	\end{itemize}
+	\item \textbf{Kosten} Proportional zu $\sqrt{A_{Wafer}}$, Chipfläche wird durch Entwickler beeinflusst
+	\begin{itemize}
+		\item $C_{Die}=\dfrac{C_{Wafer}}{\dfrac{\texttt{\#Dies}}{Wafer}*Ausbeute}$
+		\item $\texttt{\#Dies}=\dfrac{\pi*r_{Wafer}^2}{A_{Die}}-\dfrac{2\pi*r_{Wafer}}{\sqrt{2*A_{Die}}}$
+		\item $\texttt{Ausbeute}=\dfrac{\texttt{Ausbeute}_{Wafer}}{(1+\texttt{Defekte})^N}$
+	\end{itemize}
+\end{itemize}
+
 \subsection{Einführung in den Entwurf eingebetteter Systeme}
 
 \subsubsection{Die Hardware-Beschreibungssprache VHDL}
@@ -95,15 +146,19 @@ Weltweite Forschungsaktivitäten bzgl. ExaScale-Rechner
 	\item Standardisierte Hardware-Beschreibungssprache: Die verschiedenen Schaltungsbeschreibungen des gesamten Entwurfsablaufs können dargestellt werden - von der algorithmischen Spezifikation bis hin zu realisierungsnahen Strukturen
 	\item Eingesetzt zum ASIC- und FPGA-Entwurf
 	\item Bei synchroner Zuweisung werden Änderungen abhängig von einem Takt und den Eingangssignalen geändert. Bei asynchroner Zuweisung unabhängig und unmittelbar (nach einer gewissen Schaltzeit)
-	\item Vorteile automatischer Synthesewerkzeuge: Flexibilität, weniger fehleranfällig
-	\item Nachteile automatischer Synthesewerkzeuge: Randbedingungen schwer einzuhalten, Ergebnisse oft schlechter als bei manuellem Entwurf
-	\item Chip-Entwurf mit VHDL
+	\item Automatischer Synthesewerkzeuge: Flexibilität, weniger fehleranfällig. Dafür Randbedingungen schwer einzuhalten und Ergebnisse oft schlechter als bei manuellem Entwurf
+	\item Chip-Entwurf mit VHDL (Top-Down)
 	\begin{itemize}
 		\item Grundlage des Entwurfs ist die Spezifikation der Schaltung: Gewünschtes Verhalten; Schnittstellen; Vorgaben bzwgl. Geschwindigkeit, Kosten, Fläche oder Leistungsverbrauch
 		\item Entwurfsschritte: Verhaltensspezifikation, High-Level-Synthese, RT-Beschreibung, Logik-Synthese, Gatterbeschreibung, Layout-Synthese, Geometriegebschreibung, Fertigung
-		\item Hauptbestandteile: Entity, Architecture, Configuration
+		\item Hauptbestandteile: 
+		\begin{itemize}
+			\item ENTITY: Schnittstellen
+			\item ARCHITECTURE: Verhalten
+			\item CONFIGURATION: Weist COMPONENT-Instanzen zu ENTITY und ARCHITECTURE zu.
+		\end{itemize} 
 		\item Signale zur Kommunikation zwischen Instanzen untereinander oder mit Schnittstellen der äußeren Hülle (Entity)
-		\item Schnittstellendefinition eines MODUL\\\\
+		\item Schnittstellendefinition eines MODULS\\\\
 			\begin{minipage}{\linewidth}
 			\begin{lstlisting}[frame=single,numbers=left,mathescape,language=VHDL,tabsize=4]
 ENTITY blinklicht IS
@@ -156,27 +211,6 @@ ARCHITECTURE Structure OF blinklicht IS
 \end{itemize}
 
 
-\subsection{Energieeffizienter Entwurf - Grundlagen}
-\begin{itemize}
-	\item Mobile Geräte: Verfügbare Energiemenge durch Batterien und Akkus begrenzt \(\rightarrow\) vorhandene Energie möglichst lange ausnutzen sowie Vermeidung von Überhitzung
-	\item HPC: Hohe Temperaturen begrenzen die Verarbeitungsgeschwindigkeit und die beeinflussen die Zuverlässigkeit
-	\item \textbf{CMOS-Schaltung}
-	\begin{itemize}
-		\item MOSFET: Je nach Spannung am Gate und dem daraus resultierenden Feld im Kanal können Ladungsträger den Kanal passieren oder nicht. Extrem niedrige Stromaufnahme im Ruhezustand
-		\item Leistungsaufnahme: \(P_{total} = P_{switching} + P_{shortcircuit} + P_{static} + P_{leakage}\)
-		\item Statischer Leistungsverbrauch: \(P_{static}\) sowie Leistungsverbauch bei Kriechströmen (\(P_{leakage}\))
-		\item Verbrauch bei Zustandsänderung: \(P_{switching}\) sowie Verbrauch während des Übergangs am Ausgang, wenn sich die Eingänge ändern \(P_{shortciruit}\)
-		\item Höhere Frequenzen erfordern steilere Taktflaken \(\rightarrow\) schnelleres Laden von \(C_{eff}\) \(\rightarrow\) höhere Versorgungsspannung (\(P \sim V^2_{dd}\))
-		\item Reduktion der Taktfrequenz bedeutet Reduktion von Leistungsaufnahme und Ausführungsgeschwindigkeit (unter idealen Bedingungen gilt \(P \sim f\))
-		\item Schaltwahrscheinlichkeit
-		\begin{itemize}
-			\item \(\mathbb{P}_{Schalt} = 2 \cdot \mathbb{P}_{Ausgang(1)} \cdot (1-\mathbb{P}_{Ausgang}(1))\)
-			\item \(\mathbb{P}_{Ausgang}(1) = \mathbb{P}_{Eingang1}(0) \cdot \mathbb{P}_{Eingang2}(1) + \mathbb{P}_{Eingang1}(1) \cdot \mathbb{P}_{Eingang2}(0)\)
-		\end{itemize}
-	\end{itemize}
-\end{itemize}
-
-
 \subsection{Bewertung der Leistungsfähigkeit eines Rechners}
 \begin{itemize}
 	\item \textbf{Definitionen}
@@ -191,97 +225,169 @@ ARCHITECTURE Structure OF blinklicht IS
 	\end{itemize}
 	\item \textbf{Einfache Hardwaremaße}
 	\begin{itemize}
-		\item Clock cycles per instruction (CPI, mittlere Anzahl Taktzyklen pro Befehl): \(CPI = \frac{\text{CPU time}}{\text{instruction count } \cdot \text{ machine cycle time}} = \frac{T_{exe}}{IC \cdot TC}\)
-		\item Instructions per cycle (IPC): \(IPC = \frac{1}{CPI}\)
-		\item Millions of instructions per second (MIPS): \(MIPS = \frac{\text{Anzahl der ausgeführten Instruktionen}}{10^6 \text{ Ausführungszeit}}\), Floatingpointoperationen (MFLOPS) analog. Niedrigere MIPS-Werte resultieren bei gleicher Laufzeit in kompakterem Code, niedrigerer Schaltfrequenz und damit geringerem Energieverbrauch
-		\item Probleme: Angaben meist theoretische Maximalwerte bzw. abhängig vom konkreten Programm
-	\end{itemize}
-	\item \textbf{Benchmarks}
-	\begin{itemize}
-		\item Bewertung der Leistungsfähigkeit mit Hilfe von einem Programm oder einer Programmsammlung und Messen der Ausführungszeit. Zugriff auf die Maschine notwendig
-		\item Kernels: Rechenintensive Teile reale Programme, vorwiegend numerische Algorithmen (beispielsweise LINPACK Softwarepaket zum Lösen linearer Gleichungen)
-		\item Standardisierung zur Verbesserung der Vergleichbarkeit von Rechnern (inklusive OS und Compiler)
-		\item Standardisierte Benchmarks: SPEC CPU Benchmarks
-		\begin{itemize}
-			\item SPEC: Non-profit Organisation, die Benchmarks zur Leistungsbewertung von Hardware und Software entwickelt. Mit dem Erwerb einer Lizenz verpflichten sich die jeweiligen Unternehmen, immer die kompletten Ergebnisse zu veröffentlichen. So ist gewährleistet, dass nicht nur die jeweils guten Ergebnisse eines Rechners werbewirksam verwendet werden können, sondern ein möglichst breiter Querschnitt entsteht, der auch mögliche Schwächen aufzeigt.\footnote{\url{https://de.wikipedia.org/wiki/Standard_Performance_Evaluation_Corporation}}
-		\end{itemize}
+		\item Clock cycles per instruction: \(CPI = \frac{\text{CPU time}}{\text{instruction count } \cdot \text{ machine cycle time}} = \frac{T_{exe}}{IC \cdot T_C}\)
+		\item Instructions per cycle: \(IPC = \frac{1}{CPI}\)
+		\item Millions of instructions per second: \(MIPS = \frac{\text{Anzahl der ausgeführten Instruktionen}}{10^6 \text{ Ausführungszeit}}\), Floatingpointoperationen (MFLOPS) analog. Niedrigere MIPS-Werte resultieren bei gleicher Laufzeit in kompakterem Code, niedrigerer Schaltfrequenz und damit geringerem Energieverbrauch
+		\item Probleme: Angaben meist theoretische Maximalwerte bzw. abhängig vom konkreten Programm 
 	\end{itemize}
 \end{itemize}
 
-\subsubsection{Beobachtung des Laufzeitverhaltens}
+\subsubsection{Laufzeitmessungen bestehender Programme}
 \begin{itemize}
-	\item \textbf{Messung während des Betriebs von Anlagen}
+	\item Bewertung der Leistungsfähigkeit mit Hilfe von einem Programm oder einer Programmsammlung und Messen der Ausführungszeit. Problem: Zugriff auf die Maschine notwendig und abhängig von der Güte des Compilers
+	\item Kernels: Rechenintensive Teile reale Programme, vorwiegend numerische Algorithmen (beispielsweise LINPACK Softwarepaket zum Lösen linearer Gleichungen)
+	\item Standardisierung zur Verbesserung der Vergleichbarkeit von Rechnern (inklusive OS und Compiler), z.B. SPEC CPU Benchmarks
 	\begin{itemize}
-		\item Monitore: Aufzeichnungselemente, welche die Verkehrsverhältnisse während des normalen Betriebs beobachten oder untersuchen
-		\item Hardware-Monitor: Unabhängige physikalische Geräte, welche die Betriebsverhältnisse nicht beeinflussen
-		\item Software-Monitor: Eingebaut ins OS, beeinträchtigen die normalen Betriebsverhältnisse
-		\item Beispiel: Performance Counter
-		\begin{itemize}
-			\item Misst verschiedene geschwindigkeitsrelevante Vorgänge, die ein Prozessor ausführt. Dabei beeinträchtigt er die Abarbeitung anderer Aufgaben im Prozessor nicht. Heutige Prozessoren erreichen bei den aktuellen Prozessortakten eine Auflösung im Mikro- bis Nanosekundenbereich\footnote{\url{https://de.wikipedia.org/wiki/Performance_Counter_(Mikroprozessor)}}
-			\item Metriken zur Darstellung bestimmter Messgrößen. Beispielsweise Anzahl ausgeführter Befehle, Cache-Treffer oder Fehlzugriffe
-		\end{itemize}
+		\item SPEC: Non-profit Organisation, die Benchmarks zur Leistungsbewertung von Hardware und Software entwickelt. Mit dem Erwerb einer Lizenz verpflichten sich die jeweiligen Unternehmen, immer die kompletten Ergebnisse zu veröffentlichen. \footnote{\url{https://de.wikipedia.org/wiki/Standard_Performance_Evaluation_Corporation}}
+		\item $SPEC_{ratio} = \dfrac{\texttt{Referenzzeit}_x}{\texttt{Laufzeit}_x\texttt{ auf Testsystem}}$ für Benchmark $x$. Der Endwert wird als geometrisches Mittel über alle Benchmarks berechnet, aufgrund der normalisierung unabhängig von der Referenzmaschine.
 	\end{itemize}
 \end{itemize}
 
-\subsubsection{Bewertung der Leistungsfähigkeit}
+\subsubsection{Messung während des Betriebs von Anlagen}
 \begin{itemize}
-	\item \textbf{Modelltheoretische Verfahren}
+	\item Monitore: Aufzeichnungselemente, welche die Verkehrsverhältnisse während des normalen Betriebs beobachten oder untersuchen
+	\item Hardware-Monitor: Unabhängige physikalische Geräte, welche die Betriebsverhältnisse nicht beeinflussen
+	\item Software-Monitor: Eingebaut ins OS, beeinträchtigen die normalen Betriebsverhältnisse
+	\item Aufzeichnungstechniken: Kontinuierlich/spärlich, Gesamttracing, Realzeitauswertung, Post Processing 
+	\item Beispiel: Performance Counter
 	\begin{itemize}
-		\item Modellbildung: Annahmen über die Struktur und Betrieb eines Rechners sowie Analyse der relevanten Merkmale des Systems mit dem Ziel Beziehungen zwischen Systemparametern aufzudecken und Leistungsgrößen zu ermitteln
-		\item Analytische Methoden versuchen mathematische Beziehungen zwischen Leistungsgrößen herzuleiten. Oft minimaler Aufwand aber auch nur minimal aussagekräftig (beispielsweise Warteschlangenmodelle, Petrinetze, Diagnosegraphen, Netzwerkflussmodelle)
-	\end{itemize}
-	\item \textbf{Modelltheoretische Verfahren: Simulationen}
-	\begin{itemize}
-		\item Modelliert Eigenschaften oder Verhalten einer Zielmaschine
-		\item Kompromiss zwischen Simulationsgenauigkeit, Simulationsgeschwindigkeit und Entwicklungsaufwand
-		\item User-Level Simulatoren: Simulation der Mikroarchitektur eines Prozessors ohne Berücksichtigung von Systemressourcen
-		\item Full-System Simulatoren modellieren ein vollständiges Computersystem, einschließlich CPU, IO, Disk und Netzwerk
+		\item Misst verschiedene geschwindigkeitsrelevante Vorgänge, die ein Prozessor ausführt. Dabei beeinträchtigt er die Abarbeitung anderer Aufgaben im Prozessor nicht. Heutige Prozessoren erreichen bei den aktuellen Prozessortakten eine Auflösung im Mikro- bis Nanosekundenbereich\footnote{\url{https://de.wikipedia.org/wiki/Performance_Counter_(Mikroprozessor)}}
+		\item Metriken zur Darstellung bestimmter Messgrößen. Beispielsweise Anzahl ausgeführter Befehle, Cache-Treffer oder Fehlzugriffe
 	\end{itemize}
 \end{itemize}
 
-\subsubsection{Durchsatz eines Warteschlangenmodells: Gesetz von Little}
-Littles Gesetz besagt, dass die durchschnittliche Anzahl von Kunden \(L\) in einem Wartesystem, welches sich in einem stabilen Zustand befindet, gleich dem Produkt ihrer durchschnittlichen Ankunftsrate \(\lambda\) und ihrer durchschnittlichen Verweildauer im System \(W\) ist.\footnote{\url{https://de.wikipedia.org/wiki/Littles_Gesetz}}
-\[L=\lambda W\]
+\subsubsection{Modelltheoretische Verfahren}
+\begin{itemize}
+	\item Unabhängig von Existenz eines Rechners
+		\item Modellbildung: Annahmen über die Struktur und Betrieb eines Rechners sowie Analyse der relevanten Merkmale des Systems 
+		\item Ziel: Beziehungen zwischen Systemparametern aufdecken und Leistungsgrößen ermitteln
+		\item Stellt für Analyse relevante Systemkomponenten und deren Datenverkehr dar
+		\item Analytische Methoden
+		\begin{itemize}
+			\item Versucht mathematische Beziehungen zwischen Leistungsgrößen herzuleiten. Oft minimaler Aufwand aber auch nur minimal aussagekräftig (beispielsweise Warteschlangenmodelle, Petrinetze, Diagnosegraphen, Netzwerkflussmodelle)
+			\item Gesetz von Little: Für ein stabiles Warteschlangensystem gilt \[k=\lambda t\] mit $k$ als durchschnittliche Anzahl an Kunden im System, $\lambda$ als durchschnittliche Ankunftsrate und $t$ als durchschnittlicher Verweildauer.
+		\end{itemize}
+	\item Simulationen
+	\begin{itemize}
+		\item Modellierung zur evaluation neuer Ideen und der Exploration des Entwurfsraums. Mögliche Zielgrößen: Rechenleistung, Leistungsaufnahme, Zuverlässigkeit
+		\item Kompromiss zwischen Genauigkeit, kosten, Flexibilität und Komplexität
+		\item Taxonomie
+		\begin{itemize}
+			\item User-Level Simulatoren: Simulation der Mikroarchitektur eines Prozessors ohne Berücksichtigung von Systemressourcen
+			\item Full-System Simulatoren modellieren ein vollständiges Computersystem, einschließlich CPU, IO, Disk und Netzwerk	
+			\item Functional Simulatoren modellieren nur Funktionalitöt eines Prozessors, aber keine Berücksichtigung der Mikroarchitektur
+			\item Cycle-accurate Simulatoren erfassen parametrisierbare Details von Mikroarchitekturblöcken um Funktionalität und Zeitverhalten zu emulieren
+		\end{itemize}
+		\item Prozessimulatoren benötigen Liste von Befehlen die ausgeführt werden müssen
+		\begin{itemize}
+			\item Trace-driven Simulation: Durchführung des Benchmarks auf anderem Prozessor/ Simulator, dabei die Befehle \emph{tracen}. Diese Trace kann dann für einen Zyklengenauen Simulator verwendet werden. Jede Instruktion wird aud Basis des Mikroarchitekturmodells simuliert
+			\item Execution-driven Simulation: Simulator muss Zeitverhalten und Funktionalität genau reproduzieren. Daher aufwendig in der Entwicklung aber dafür genauer und flexibler
+		\end{itemize} 
+	\end{itemize}
+\end{itemize}
 
 
 \subsection{Zuverlässigkeit und Fehlertoleranz}
 \begin{itemize}
-	\item Zuverlässigkeit: Bezeichnet die Fähigkeit eines Systems während einer vorgegebenen Zeitdauer bei zulässigen Betriebsbedingungen die spezifizierte Funktion zu erbringen
-	\item Fehlertoleranz: Bezeichnet die Fähigkeit eines Systemes auch mit einer begrenzten Anzahl fehlerhafter Subsysteme die spezifizierte Funktion zu erbringen
+	\item Taxonomie
+	\begin{itemize}
+		\item Zuverlässigkeit: Wird während gewisser Zeitdauer bei zulässigen Betriebsbedingungen die spezifizierte Funktion erbracht?
+		\item Fehlertoleranz: Ist das System trotz begrenzter Anzahl fehlerhafter Subsysteme in der Lage die spezifizierte Funktion zu erbringen?
+		\item Sicherheit: Nichtvorhandensein einer Gefahr unter anzunehmenden Betriebsbedingungen. Verfügbarkeit, Überlebenswahrscheinlichkeit, ...
+		\item Vertraulichkeit: Datenschutz und Zugangssicherheit
+	\end{itemize}
+	\item Fehler
+	\begin{itemize}
+		\item Zustände
+		\begin{itemize}
+			\item Fehlerfrei, sicher
+			\item Fehlerhaft, sicher/in Gefahr
+			\item Schaden/ Funktionsausfall
+		\end{itemize}
+		\item Ursachen
+		\begin{itemize}
+			\item Entwurf (Spezifikation/Implementierung/Dokumentation)
+			\item Herstellung
+			\item Betrieb: Störung (externer Einfluss), Verschleiß, zufällig physikalischer Fehler, Bedienung,  Wartung
+		\end{itemize}
+		\item Dauer: Temporär oder Permanent
+	\end{itemize}
 	\item \textbf{Struktur-Funktions-Modell}
 	\begin{itemize}
 		\item Gerichteter Graph, dessen Knoten die Komponenten und dessen Kanten die Funktionen eines Systems repräsentieren. Eine Kante \(K_i \longrightarrow K_j\) bedeutet, dass \(K_i\) eine Funktion erbringt, die von \(K_j\) genutzt wird
-		\item Binäres Fehlermodell gibt für jede Komponente und das Gesamtsystem an ob sie fehlerfrei sind
-		\item Negierter Strukturbaum gibt an, wie sich Fehler des Systems auf Fehler der Komponenten zurückführen lassen
-	\end{itemize}
-	\item \textbf{Darstellung}
-	\begin{itemize}
-		\item Zuverlässigkeitsblockdiagramm: Zeigt mögliche "`Verbindungspfade"' zwischen den Komponenten, von denen mindestens einer in Takt sein muss. Reihenschaltung von AND-Bausteinen, Parallelschaltung von OR-Bausteinen
-		\item Systemfunktion: Äquivalente Darstellung eines Zuverlässigkeitsdiagramm als logische Funktion
-		\item Strukturbaum
-		\begin{enumerate}
-			\item Negieren der Systemfunktion: Alle Blätter werden negiert, alle Verknüpfungen werden vertauscht (\(AND \leftrightarrow OR\))
-		\end{enumerate}
+		\item eine Komponentenmenge ist ein System, wenn die erbrachten Funktionen durch eine äußere Spezifikation festgelegt werden		
+		\begin{figure}
+			\begin{center}
+				\includegraphics[width=0.4\textwidth]{assets/schichtenmodell.jpg}
+				\caption{Schichtenmodell eines Zweirechensystems. Funktionszuordnungen sind nur von unteren auf höhere Schichten möglich.}		
+			\end{center}
+			\end{figure}	
+		\item Binäres Fehlermodell gibt für jede Komponente und das Gesamtsystem an ob sie fehlerfrei sind: $Z: (S \cup \{S\}) \rightarrow \{\texttt{wahr, falsch}\}$. Die Systemfunktion gibt in Abhängigkeit der Komponenten die Funktion des Systems an.
+		\item Zuverlässigkeitsblockdiagramm: Zeigt mögliche "`Verbindungspfade"' zwischen den Komponenten, von denen mindestens einer in Takt sein muss. Reihenschaltung von AND-Bausteinen, Parallelschaltung von OR-Bausteinen. Äquivalent zur Systemfunktion.
+		\item Negierter Systemfunktionsbaum (alle Blätter werden negiert, alle Verknüpfungen werden vertauscht (\(AND \leftrightarrow OR\))) gibt an, wie sich Fehler des Systems auf Fehler der Komponenten zurückführen lassen.
+		\item \textbf{Fehlerbereiche} Komponenten, welche zeitgleich fehlerhaft sein können ohne zu Systemfehlern zu führen. 
+		\begin{itemize}
+			\item Einzelfehlerbereich: Menge von Komponenten, die exakt denselben Fehlerbereichen angehören
+			\item Perfektionskern: Das Komplement der Vereinigung aller Fehlerbereiche $\rightarrow$ Komponenten, welche nicht ausfallen dürfen
+		\end{itemize}
 	\end{itemize}
 	\item \textbf{Ausfallverhalten}
 	\begin{itemize}
+		\item Teilausfall: Es fallen nicht alle Funktionen aus
 		\item Unterlassungsausfall (Fail-silent-System): Keine Ausgabe fehlerhafter Ergebnisse. Wenn ein Ergebnis ausgegeben wird, ist es korrekt
 		\item Anhalteausfall (Fail-stop-System): Keinerlei Ergebnisausgabe mehr
+		\item Haftausfall: Komponente gibt ständig denselben Ergebniswert aus
+		\item Binärstellenausfall: Ein Fehler verfälscht eine/mehrere Binärstellen
 		\item Unkritische Ausfälle (Fail-safe-System)
 	\end{itemize}
-	\item \textbf{Redundanz}
+	\item \textbf{Ausfallverhalten}
+	\begin{itemize}
+		\item Fehlereingrenzung und Vermeidung von Folgefehlern
+			\item Vertikal: Niedrigere Schichten prüfen Funktionsaufrufe vor Ausführung, Fehlerkorrekturcode in der Hardware, Plausibilitäts-/Konsistenzprüfungen
+			\item Horizontal: Isolierung fehlerhafter lokaler Knoten. Problem vor allem bei globalen Schichten.		 
+	\end{itemize}
+	\item Um Anforderungen zu erfüllen sind Fehlertoleranz (Redundanz) und Fehlervermeidung wichtig.
+	\item Zuverlässigkeitskenngrößen als Verteilungsfunktionen von Lebensdauer, Fehlerbehandlungsdauer und Sicherheit statistisch betrachten
+	\begin{itemize}
+		\item $F_L(t)=\dfrac{N_f(t)}{N}=\dfrac{N-N_s(t)}{N}=1-R(t)=1-e^{-\lambda t}$ - Wahrscheinlichkeit, dass ein funktionierende System fehlerhaft wird mit Anzahl Komponenten $N$ und $f$ failed oder $s$ survived. Fehlerwarscheinlichkeit exponentialverteilt mit Parameter $\lambda$
+		\item $R(t)=\dfrac{N_s(t)}{N}$ - Überlebenswahrscheinlichkeit
+		\item $N_f(t)=N-N_s(t)$
+		\item $z(t)=\dfrac{f_L(t)}{R(t)}$ als Ausfallrate
+		\item Ausfallverhalten ("`Badewannenkurve"'): Frühphase (hohe Ausfallwahrscheinlichkeit durch Fertigungsfehler oder defekte Bauteile), Betriebsphase, Spätphase (hohe Ausfallwahrscheinlichkeit durch Verschleiß)
+		\item $V=\dfrac{E(L)}{E(L)+E(B)}$ als Verfügbarkeit mit Lebensdauer $L$ und Behandlungsdauer $B$
+		\item $\phi(S)=\sum_{(K_1,\dots,K_n)\in f^{-1}(\texttt{wahr})}\phi(\wedge_{i=1}^n K_i) $ Funktionswahrscheinlichkeit
+		\item Weitere Kenngrößen: Gefährdungwahrscheinlichkeit, Sicherheitswahrscheinlichkeit, mittlere Sicherheitsdauer
+	\end{itemize}
+			\item \textbf{Redundanz}
 	\begin{itemize}
 		\item Statische Redundanz: Vorhandensein redundanter Systeme während des gesamten Einsatzzeitraums (n-von-m-System)
-		\item Zuverlässigkeit von n-von-m-Systemen (3-aus-5 vs. 2-aus-3): Das 3-aus-5-System zeigt in der Anfangszeit eine höhere Funktionswahrscheinlichkeit als das 2-aus-3-System. Nach einiger Zeit (Schnittpunkt der beiden Graphen im Bild) kehrt sich dieser Effekt jedoch um. Anfangs sind die einzelnen Funktionswahrscheinlichkeiten noch hoch und bei einem 3-aus-5-System können bis zu 2 Komponenten ausfallen. Wenn die Funktionswahrscheinlichkeit einen bestimmten Punkt unterschreitet, ist ein 2-aus-3-System sicherer, da nur 2 Komponenten zum Betrieb notwendig sind
-		\item Dynamische Redundanz: Vorhandensein redundanter Systeme, die erst nach Auftreten eines Fehlers aktiviert werden
+		\item Statische Redundanz/Zuverlässigkeit von n-von-m-Systemen (3-aus-5 vs. 2-aus-3): Das 3-aus-5-System zeigt in der Anfangszeit eine höhere Funktionswahrscheinlichkeit als das 2-aus-3-System. Nach einiger Zeit (Schnittpunkt der beiden Graphen im Bild) kehrt sich dieser Effekt jedoch um. Anfangs sind die einzelnen Funktionswahrscheinlichkeiten noch hoch und bei einem 3-aus-5-System können bis zu 2 Komponenten ausfallen. Wenn die Funktionswahrscheinlichkeit einen bestimmten Punkt unterschreitet, ist ein 2-aus-3-System sicherer, da nur 2 Komponenten zum Betrieb notwendig sind
+		\item Dynamische Redundanz: Vorhandensein redundanter Systeme, die erst nach Auftreten eines Fehlers aktiviert werden. Kann zuvor ungenutzt oder fremdgenutzt sein. Auch gegenseitige Redundanz möglich.
 	\end{itemize}
-	\item Ausfallverhalten ("`Badewannenkurve"'): Frühphase (hohe Ausfallwahrscheinlichkeit durch Fertigungsfehler oder defekte Bauteile), Betriebsphase, Spätphase (hohe Ausfallwahrscheinlichkeit durch Verschleiß)
 \end{itemize}
 
 
+\subsection{Grundlagen der Parallelverarbeitung}
+\begin{itemize}
+	\item \textbf{Formen} 
+	\begin{itemize}
+		\item Nebenläufigkeit: Objekte werden vollständig gleichzeitig abgearbeitet
+		\item Pipelining: Bearbeitung von Objekten wird in sequentielle Teilschritte zerlegt. Pipelinephasen dürfen für verschiedene Objekte überlappen.	
+	\end{itemize}
+	\item \textbf{Ebenen}
+	\begin{itemize}
+		\item Programmebene: Vom OS organisisert, vollständig unabhängige Einheiten die parallel verarbeitet werden
+		\item Prozess/Taskebene: Programm wird in parallel ausführbare Prozesse zerlegt, jeweils eigener Adressraum. Benötigt Synchronisation und Kommunikation, Primitive durch OS implementiert
+		\item Blockebene: Threads, teilen sich Adressraum, Synchronisation über Mutex usw., dafür geringerer Aufwand für Erzeugung/ Beendigung/ Wechsel im Vergleich zum Prozess
+	\item Anweisungs-/Befehlsebene: Parallele Ausführung elementarer Anweisungen, Optimierende Compiler, Umordnen und Parallelisieren von Befehlen, Superskalar-Technologie
+		\item Suboperationsebene: Aufbrechen elementarer Anweisungen in parallel auszuführende Suboperationen durch Compiler, bspw. überlappte Ausführung bei Vektorrechner in Vektorpipeline
+	\end{itemize}
+	\item Körnigkeit der Parallelität: Verhältnis Rechenaufwand zu Synchronisationsaufwand.
+\end{itemize}
+
 \subsection{Klassifikation von Rechnerarchitekturen}
 \begin{itemize}
-	\item \textbf{Flynn'sche Taxonomie}
+	\item \textbf{Flynn'sche Taxonomie} Zahl Befehls- und Datenströme
 	\begin{itemize}
 		\item Single Instruction, Single Data (SISD): Uniprozessor
 		\item Single Instruction, Multiple Data (SIMD): Vektorrechner, Feldrechner
@@ -289,7 +395,6 @@ Littles Gesetz besagt, dass die durchschnittliche Anzahl von Kunden \(L\) in ein
 		\item Multiple Instruction, Multiple Data (MIMD): Multiprozessor
 	\end{itemize}
 \end{itemize}
-
 
 
 \section{Parallelismus auf Machinenbefehlsebene}
@@ -345,7 +450,6 @@ Littles Gesetz besagt, dass die durchschnittliche Anzahl von Kunden \(L\) in ein
 
 
 \subsection{Nebenläufigkeit}
-
 \subsubsection{Superskalartechnik}
 \begin{itemize}
 	\item Mehrfachzuweisung: Pro Takt können mehrere Befehle den Ausführungseinheiten zugeordnet und die gleiche Anzahl von Befehlsausführungen pro Takt beendet werden
