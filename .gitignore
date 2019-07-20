@@ -3,6 +3,9 @@
 *.out
 *.toc
 *.dvi
+*.gz
+
+build/
 
 main.pdf
 algo2only.pdf
