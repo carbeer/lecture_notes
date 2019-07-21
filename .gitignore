@@ -7,6 +7,7 @@
 *.pdf 
 
 build/
+*/*.pdf
 
 main.pdf
 algo2only.pdf
