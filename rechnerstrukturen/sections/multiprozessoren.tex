@@ -1,0 +1,297 @@
+
+\chapter{Multiprozessoren - Parallelismus auf Prozess-/Blockebene}
+
+\section{Allgemeine Grundlagen}
+
+\subsection{Parallele Architekturmodelle}
+\begin{itemize}
+	\item \textbf{Multiprozessor mit gemeinsamem Speicher: Uniform Memory Access (UMA)}
+	\begin{itemize}
+		\item Gleichberechtigter Zugriff der Prozessoren auf die Betriebsmittel
+		\item Gemeinsamer Speicher mit globalem Adressraum, Austausch von Daten über gemeinsamen Speicher durch LS-Operationen
+		\item Beispiele: Symmetrischer Multiprozessor (SMP), Multicore-Prozessor
+	\end{itemize}
+	\item \textbf{Multiprozessor mit verteiltem Speicher: No Remote Memory Access (NORMA)}
+	\begin{itemize}
+		\item Physikalisch verteilter Speicher
+		\item Jeder Knoten mit einem privaten Adressraum
+		\item Kommunikation durch Nachrichtenaustausch über ein Interconnect Network
+		\item Beispiel: Cluster
+	\end{itemize}
+	\item \textbf{Multiprozessor mit verteiltem gemeinsamen Speicher: Non-Uniform Memory Access (NUMA)}
+	\begin{itemize}
+		\item Globaler Adressraum über mehreren, exklusiv jeweils einem Prozessor zugeordneten Speichereinheiten
+		\item Speicher physikalisch verteilt
+		\item Zugriff auf entfernten Speicher über LS-Operationen (über ein Interconnect Network)
+		\item Beispiel: Cache-Coherent Non-Uniform Memory Access oder Distributed shared Memory (DSM)
+	\end{itemize}
+\end{itemize}
+
+\section{Parallele Programmiermodelle}
+\begin{itemize}
+	\item Programmiermodell: Abstraktion einer parallelen Maschine, die spezifiziert, wie Teile des Programms parallel abgearbeitet werden und wie Informationen ausgetauscht werden können
+	\item \textbf{Parallele Programmierung}
+	\begin{itemize}
+		\item Aufteilung der Arbeit (work partitioning): Identifizieren der Teilaufgaben, die parallel ausgeführt und auf mehrere Prozessoren verteilt werden können (Programmsegmente müssen unabhängig von einander sein)
+		\item Koordination (coordination): Koordination/Synchronisierung/Kommunikation (zwischen) den/der Prozesse
+		\item Sychronisation und Koordination: Austausch von Informationen über gemeinsamen Speicher oder über explizite Nachrichten. Zusätzlicher Zeitaufwand hat Auswirkung auf die Ausführungszeit des parallelen Programms
+		\item: Parallelismus: Daten (z.B. Matrixmultiplikation) oder Funktion (unabhängige Funktionen) 
+		\item \textbf{Gemeinsamer Speicher (Shared Memory)}
+		\begin{itemize}
+			\item Verwendung konventioneller Speicheroperationen für die Kommunikation über gemeinsame Adressen
+			\item Atomare Synchronisationsoperationen
+		\end{itemize}
+		\item \textbf{Nachrichten (Message Passing)}
+		\begin{itemize}
+			\item Kein gemeinsamer Adressbereich, Kommunikation der Prozesse (Threads) mit Hilfe von Nachrichten
+			\item Kommunikationsarchitektur: Verwendung von korrespondierenden Send- und Receive-Operationen
+		\end{itemize}
+		\item Beispiel: OpenMP für gemeinsamen Speicher, MPI für verteilten Speicher
+	\end{itemize}
+	\item Durchzuführende Schritte beim Parallelisierungsprozess: Dekomposition, Zuweisung, Festlegung, Abbildung
+\end{itemize}
+
+
+\section{Quantitative Maßzahlen}
+
+\subsection{Definitionen}
+\begin{itemize}
+	\item \(P(1)\) bzw. \(P(n)\): Anzahl der auszuführenden Operationen/Tasks auf einem Einprozessor- bzw. Multiprozessorsystem
+	\item \(T(1)\) bzw. \(T(n)\): Ausführungszeit auf einem Einprozessor- bzw. Multiprozessorsystem in Schritten oder Takten
+\end{itemize}
+
+\subsection{Parallelitätsprofil}
+\begin{itemize}
+	\item Misst die entstehende Parallelität in einem Programm oder bei der Ausführung auf einem Parallelrechner und liefert so eine Vorstellung von der inhärenten Parallelität eines Algorithmus/Programms
+	\item Grafische Darstellung: XY-Diagramm mit Anzahl der parallelen Aktivitäten in zeitlicher Abhängigkeit \(\rightarrow\) Perioden von Berechnungs- Kommunikations- und Untätigkeitszeiten sind erkennbar
+	\item Der Parallelitätsgrad \(PG(t)\) gibt die Anzahl der Tasks an, die zu einem Zeitpunkt parallel bearbeitet werden können
+	\item Leistungsangaben zu Multiprozessorsystemen werden mit Leistungsangaben zu Einprozessorsystemen in Beziehung gesetzt
+	\item \textbf{Parallelindex I (Mittlerer Grad des Parallelismus)}
+	\begin{itemize}
+		\item Durchschnittliche Parallelität pro Zeiteinheit
+		\item Kontinuierlich: \(I = \frac{1}{t_2-t_1}\int_{t_1}^{t_2}PG(t)dt\)
+		\item Diskret: \(\Big(\sum_{i=1}^m i\cdot t_i\Big)~/~\Big(\sum_{t=1}^mt_i\Big)\)
+	\end{itemize}
+	\item $S(n)=\dfrac{T(1)}{T(n)}$ gibt den Speedup an, die Effizienz berechnet sich zu $E(n)=\dfrac{S(n)}{n}$
+	\item $U(n)=\dfrac{I(n)}{n}$ als Auslastung 
+\end{itemize}
+
+\subsection{Skalierbarkeit eines Parallelrechners}
+\begin{itemize}
+	\item Das Hinzufügen von weiteren Verarbeitungselementen führt zu einer kürzeren Gesamtausführungszeit, ohne dass das Programm geändert werden muss
+	\item Bei fester Problemgröße und steigender Prozessorzahl wird eine Sättigung eintreten
+\end{itemize}
+
+\subsection{Gesetz von Amdahl}
+\begin{itemize}
+	\item Ein Programm kann nie vollständig parallel ausgeführt werden, da einige Teile wie Prozess-Initialisierung oder Speicherverwaltung nur einmalig auf einem Prozessor ablaufen oder der Ablauf von bestimmten Ergebnissen abhängig ist\(\rightarrow\) Zerlegung des Programmlaufs in Abschnitte, die entweder vollständig sequentiell oder vollständig parallel ablaufen und fasst sie zu jeweils einer Gruppe zusammen\footnote{\url{https://de.wikipedia.org/wiki/Amdahlsches_Gesetz\#Beschreibung}}
+	\item Gesamtausführungzeit (Gesetz von Amdahl): \(T(n) = T(1) \cdot \frac{1-a}{n} + T(1) \cdot a\), \(a\): Anteil des Programms, der nur sequentiell ausgeführt werden kann
+	\item Superlinearen Speedup kann es nicht geben, da jeder paralle Algorithmus einen sequentiellen Teil hat, der die Beschleunigung begrenzt: \(1 \le S(n) \le n\). Tritt jedoch in der Realität dennocg auf: Ursache ist beispielsweise, dass bei einem Mehrprozessorsystem die Daten vollständig in lokale Caches und Hauptspeicher passen (kein Verlust durch häufige Seitenwechsel)
+\end{itemize}
+
+
+\section{Verbindungsnetzwerke}
+
+\subsection{Verbindungsstrukturen}
+\begin{itemize}
+	\item \textbf{Verbindungsnetzwerke in Multiprozessoren}
+	\begin{itemize}
+		\item Ermöglichen die Kommunikation und Kooperation zwischen den Verarbeitungselementen
+		\item Einsatz: Chip-Multiprozessor (NoC, beispielsweise Verbinden des gemeinsamen L2-Cache), Multiprozessor mit gemeinsamem oder verteilten Speicher
+	\end{itemize}
+	\item \textbf{Charakterisierung von Verbindungsnetzwerken}
+	\begin{itemize}
+		\item Latenz
+		\begin{itemize}
+			\item Übertragungszeit einer Nachricht \(T_{msg}=t_{\text{message startup time}}+t_{\text{message transfer time}}\), Vorraussetzung: Das Netzwerk ist konfliktfrei
+			\item Kanalverzögerung (channel delay): Dauer für die Belegung eines Kommunikationskanals durch eine Nachricht
+			\item Schaltverzögerung: Zeit, die benötigt wird um einen Weg zwischen zwei Knoten aufzubauen. Pfadberechnung oder Wegfindung
+			\item Blockierungszeit: Wird verursacht, wenn zu einem Zeitpunkt mehr als eine Nachricht auf eine Netzwerkressource zugreifen will
+		\end{itemize}
+		\item Durchsatz/Übertragungsbandbreite
+		\item Bisektionsbandbreite: Maximale Bandbreite, die das Netzwerk über die Bisektionslinie (teilt das Netzwerk in zwei Hälften) transportiert werden kann
+		\item Diameter/Durchmesser: Maximale Distanz zwischen zwei Prozessoren/Knoten
+		\item Verbindungsgrad: Anzahl der Direktverbindungen pro Knoten
+		\item Mittlere Distanz: Durchschnittlicher Abstand zwischen zwei Knoten
+		\item Komplexität/Erweiterbarkeit/Skalierbarkeit
+		\item Ausfalltoleranz/Redundanz
+		\item \textbf{Art des Transfers}
+		\begin{itemize}
+			\item Durchschalte- oder Leistungsvermittlung: Schalten einer Direktverbindung zwischen zwei Knoten, blockierungsfrei, kurze Latenz, gut geeignet für lange Nachrichten
+			\item Paketvermittlung: Datenpakete fester Länge werden entsprechend einem Wegfindealgorithmus übertragen, geeignet für kurze Nachrichten
+		\end{itemize}
+	\end{itemize}
+	\item \textbf{Verbindungsnetzwerk (IN)}
+	\begin{itemize}
+		\item Knoten: über Netzwerkschnittstelle verbunden
+		\item Switch/Schaltelement: setzt Verbindungen
+		\item Link: Verbindungen, synchron mit gemeinsamer Taktquelle oder asynchron über Handshake
+		\item Nachricht: Uni-/Multi-/Broadcast, Fixed length möglich
+	\end{itemize}
+	\item \textbf{Datentransfer}
+	\begin{itemize}
+		\item Durchschalte- oder Leistungsvermittlung/Circuit Switching: Es wird eine direkte Verbindung zwischen Knoten geschaltet, keine Unterbrechung, keine Routing-Information im Paket nötig. Dafür blockieren der Leitung
+		\item Paketvermittlung/Packet switching: Pakete mit fester Länge werden geroutet, bedarfsorientiertes Blocken der Leitungen. Store and forward von Paketen oder Cut-through Switching
+	\end{itemize}
+	\item End-to-end packet latency model: Betrachte Gesamtlatenz. $\texttt{E2E latency}=\texttt{Sender Overhead +  \texttt{Time of flight}+\texttt{Transmission time}+\texttt{Routing time}+\texttt{Receiver Overhead}}$
+	\item Effektive Bandbreite: $EB=\dfrac{\texttt{Paketgröße}}{max{\texttt{Sender OH}, \texttt{Empfänger OH}, \texttt{Übertragungszeit}}}$
+	\item \textbf{Verbindungsnetze}
+	\begin{itemize}
+		\item Statische Verbindungsnetze
+		\begin{itemize}
+			\item Nach Aufbau des Verbindungsnetzes bleiben die Strukturen fest
+			\item Vorhersagbare Kommunikationsmuster zwischen Knoten
+			\item Vollständige Verbindung: Alle Knoten sind miteinander verbunden. Höchste Leistungsfähigkeit aber nicht praktikabel bei hoher Prozessorzahl (Aufwand steigt qudratisch mit der Prozessorzahl)
+			\item Gitterstrukturen: Verbinden benachbarte Knoten. Disjunkte Bereiche können parallel genutzt werden, allerdings oft mehrere Schritte notwendig (bei unbenachbarten Knoten)
+			\item Unidirektionaler Ring: Nachrichten werden vom Quellknoten zum Zielknoten geschickt. Bei Ausfall bricht die Kommunikation zusammen
+			\item Bidirektionaler Ring: Übertragung kann die kürzeren der beiden Wege wählen. Bei einer Unterbrechung bleibt die Kommunikation bestehen
+			\item Chordaler Ring: Hinzufügen weiterer Direktverbindungen zur Erhöhung der Fehlertoleranz
+			\item Baumstruktur: Teilweise mit steigender Anzahl an Kommunikationskanälen in Richtung Wurzel
+			\item Diverse Kubusstrukturen, beispielsweise Hyperkubus: Binäre Bezeichnung der Knoten ermöglicht Routenbestimmung (benachbarte Knoten unterscheiden sich um genau eine Stelle, Start- und Zieladresse werden per XOR verknüpft). Allerdings schlechte Skalierbarkeit, da bei jeder Erweiterung der Knotengrad steigt und alle Knoten erweitert werden müssen
+			\begin{itemize}
+				\item Anzahl der Knoten eines \(K\)-nären \(n\)-Kubus: \(N = K^n\)
+				\item Knoten-/Verbindungsgrad: \(2n\)
+			\end{itemize}
+		\end{itemize}
+		\item Dynamische Verbindungsnetze
+		\begin{itemize}
+			\item Geeignet für dynamische Anwendungen mit variablen und nicht regulären Kommunikationsmustern
+			\item Bus: Wird von allen an den Bus angeschlossenen Prozessoren gemeinsam genutzt. Verwendung von Cache-Speichern (mit Cache-Kohärenz-Protokollen zur Synchronisiation) zur Reduzierung des Busverkehrs. Synchronisation durch Split-Phase Busprotokollen erforderlich
+			\item Kreuzschienenverteiler (Crossbar)
+			\begin{itemize}
+				\item Hardwaresystem, das in einer Menge an Prozessoren zwischen allen disjunkten Paaren von Prozessoren blockierungsfreie Direktverbindungen zur Kommunikation aufbauen kann. Schaltelemente an allen Kreuzungspunkten \(\rightarrow\) hoher Hardwareaufwand
+				\item Schalterelemente (2x2-Kreuzschienenverteiler) bestehen aus Zweierschaltern mit je zwei Ein- und Ausgängen, die entweder durch- oder über kreuz schalten können
+			\end{itemize}
+			\item Omega-Netz: Besteht aus \(\frac{N\cdot log_k(N)}{k}\) Crossbars bei \(N\) Knoten mit Switch-Grad \(k\). Nicht blockierungsfrei
+			\item Mischpermutationnetz: Kreisverschiebung der Adressbits
+			\item Allgemeine Beispiele für dynamische Verbindungsnetzwerke: Bus, Kreuzschiene, Schaltnetzwerk
+			\item Kreuzpermutation: Abbildung auf invertierte ID. Beispielsweise \(001 \longrightarrow 100\)
+			\item Mischpermutation: Addieren von \(\forall 0..\frac{n-1}{2}:2n\). Beispielsweise \(000 \longrightarrow 000, 001 \longrightarrow 010\). Die obere Hälfte invertiert
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
+
+\section{Multiprozessoren mit gemeinsamem Speicher}
+\begin{itemize}
+	\item Gültigkeitsproblem: Paralleler Zugriff mehrere Prozessoren auf den Hauptspeicher \(\rightarrow\) mehrere Kopien des gleichen Speicherwortes müssen miteinander in Einklang gebracht werden
+	\item Inklusionseigenschaft bei Caches: Der Inhalt des Caches auf der höchsten Stufe ist auch in den Caches niedrigerer Stufen enthalten
+	\item \textbf{Cache-Kohärenz-Problem}
+	\begin{itemize}
+		\item 1. Fall (IO-Problem): System mit einem Mikroprozessor und weiteren Komponenten mit Master-Funktion (ohne Cache)
+		\begin{itemize}
+			\item Zusätzlicher Master (beispielsweise DMA-Controller) kann Kontrolle über den Bus übernehmen und prozessorunabhängig auf den Hauptspeicher zugreifen
+			\item Problem: Prozessor oder DMA-Controller lesen eventuell veraltete Daten (stale data)
+			\item Lösungen des Kohärenzproblems
+			\begin{itemize}
+				\item Non-Cacheable Data: Der gemeinsam genutzte Speicherbereich wird nicht gecacht bzw. mit "`non-cacheable gekennzeichnet"'
+				\item Cache-Clear/Cache-Flush: Nach einem DMA-Vorgang wird der Cache automatisch neu geladen
+			\end{itemize}
+		\end{itemize}
+		\item 2. Fall: Speichergekoppeltes Multiprozessorsystem
+		\begin{itemize}
+			\item Mehrere Prozessoren mit jeweils eigenem Cache-Speicher sind über einen Systembus an einen gemeinsamen Hauptspeicher angebunden
+		\end{itemize}
+	\end{itemize}
+	\item \textbf{Kohärenz}
+	\begin{itemize}
+		\item Vereinfachte Definition "`Cache-Kohärenz"': Ein Speichersystem ist kohärent, wenn jeder Lesezugriff auf ein Datum den aktuellen, geschriebenen Wert dieses Datums liefert
+		\item Ein paralleles Programm, das auf einem Multiprozessor läuft, kann mehrere Kopien eines Datums in mehreren Caches haben
+		\item Möglichkeiten, die Kohärenzanforderungen zu erfüllen
+		\begin{itemize}
+			\item Write-invalidate-Protokoll: Sicherstellen, dass ein Prozessor exklusiven Zugriff auf ein Datum hat, bevor er schreiben darf. Vor dem Verändern einer Kopie in einem Cache-Speicher müssen alle Kopien in anderen Cache-Speichern für ungültig erklärt werden
+			\item Write-update-Protokoll: Beim Verändern einer Kopie in einem Cache-Speicher müssen alle Kopien in anderen Cache-Speichern ebenfalls verändert werden, wobei die Aktualisierung auch verzögert (allerdings spätestens beim Zugriff) erfolgen kann
+		\end{itemize}
+	\end{itemize}
+	\item \textbf{Kohärenzprotokolle}
+	\begin{itemize}
+		\item Bus-Snooping: Caches sind an einem gemeinsamen Bus und beobachten diesen, um feststellen zu können, ob sie eine Kopie eines Blocks enthalten, der benötigt wird
+		\item MESI-Kohärenzprotokoll (Hardware)
+		\begin{itemize}
+			\item Jeder Cache verfügt über Snoop-Logik und Steuersignale: Invalidate-Signal (zum Invalidieren von Einträgen in anderen Caches), Shared-Signal (zeigt an, ob ein zu ladender Block bereits als Kopie besteht) und Retry-Signal (Aufforderung für den Prozessor das Laden eines Blocks abzubrechen. Nachdem ein anderer Prozessor aus dem Cache in den Hauptspeicher zurückgeschrieben hat wird das Laden wieder aufgenommen)
+			\item Erweiterung jeder Cache-Zeile um zwei Steuerbits zum Anzeigen der Zustände:
+			\begin{itemize}
+				\item Invalid (I): Die Cache-Zeile ist ungültig. Mittels Shared-Signal zeigen die anderen Steuerungen an, ob sie diesen Block gespeichert haben (shared read hit/miss). Davon abhängig erfolgt der Übergang in \(S\) oder \(E\). Bei einem Write-Miss erfolgt der Übergang in \(M\)
+				\item Shared (S): Der Speicherblock existiert sowohl lokal als auch in anderen Caches. Bei einem Schreibzugriff übergang in Zustand \(M\) und Ausgeben des Invalidate-Signals
+				\item Exclusive (E): Der Speicherblock existiert exklusiv nur in der Zeile dieses Caches. Lese- und Schreibzugriffe möglich, ohne den Bus benutzen zu müssen. Nach Schreibzugriff, Wechsel in \(E\)
+				\item Modified (M): Der Speicherblock existiert nur lokal und ist nach dem Laden verändert worden. Bei einem externen Zugriff durch einen anderen Prozessor muss dieser in den Hauptspeicher zurückkopiert werden. Der externe Prozessor wird über das Retry-Signal informiert, dass zunächst zurückgeschrieben werden muss
+			\end{itemize}
+			\item Zustandsgraphen und Beispiel in den Folien\footnote{VL-07 Folie 2-40 bis 2-47}
+		\end{itemize}
+		\item MOESI-Kohärenzprotokoll: Erweitert das MESI-Protokoll um den zusätzlichen Zustand \texttt{Owned} (\texttt{O}). Es vermeidet das Zurückschreiben von modifizierten Cache-Lines, wenn andere CPUs diese lesen wollen. Stattdessen wird der aktuelle Wert bei jeder Veränderung zwischen den Caches direkt propagiert\footnote{\url{https://de.wikipedia.org/wiki/MOESI}} (praktisch, wenn ein Prozessor einen Wert in seinen Cache läd, der bereits in einem anderen Cache existiert)
+		\item Distributed Shared Memory
+		\begin{itemize}
+			\item Multiprozessor mit verteiltem, gemeinsamem Speicher ohne Möglichkeit, die Broadcasteigenschaft des Busses zu nutzen
+			\item Verzeichnisbasierte, tabellenartige Cache-Kohärenzprotokolle, die in Hardware oder Software implementiert sein können
+			\item Die Tabelle protokolliert für jeden Block im loken Speicher, ob dieser in den lokalen oder einen entfernten Cache-Speicher übertragen worden ist und hält die Zustände als Kopien
+			\item Zustände werden ähnlich denen des MESI-Protokolls definiert
+		\end{itemize}
+	\end{itemize}
+	\item \textbf{Speicherkonsistenz}
+	\begin{itemize}
+		\item Sequentielle Konsistenz: Ein Multiprozessorsystem heißt sequentiell konsistent, wenn das Ergebnis einer beliebigen Berechnung dasselbe ist, als wenn die Operation sequentiell auf einem Einprozessorsystem ausgeführt worden ist
+		\item Atomar Schreibzugriffe
+		\item Programmierer geht von sequentieller Konsistenz aus \(\rightarrow\) sehr starke Leistungseinbußen bzgl. der Implementierung und der Leistung. Verbietet vorgezogene Ladeoperationen und nicht-blockierende Caches
+		\item Schwache Konsistenz (Speicherkonsistenzmodell)
+		\begin{itemize}
+			\item Konkurrierende Zugriffe auf gemeinsame Daten werden durch Sychronisationen geschützt (beispielsweise Semaphoren oder Mutecies)
+			\item Idee: Konsistenz des Speicherzugriffs wird nicht mehr zu allen Zeiten gewährleistet sondern nur zu definierten Synchronisationspunkten. Einführung "`kritischer Bereiche"' innerhalb denen keine Synchronisation gewährleistet sein muss
+			\item Voraussetzung: Hardware oder softwareseitige Unterscheidung der Synchronisationsbefehlen von den LS-Befehlen und eine sequentiell konsistente Implementierung der Synchronisationsbefehle
+			\item Atomare, nicht-unterbrechbare LS-Befehle auf den Speicher. Synchronisation auf Benutzerebene. Häufige Implementierung: Spin Locks oder Barriers
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
+
+\section{Multiprozessoren mit verteiltem Speicher}
+
+\subsection{Programmiermodell}
+\begin{itemize}
+	\item Nachrichtenorientiert (message passing)
+	\item \textbf{Synchrones Message Passing}
+	\begin{itemize}
+		\item Sender und Empfänger blockieren bis die Nachricht beim Empfänger angekommen ist und in den gewünschten lokalen Speicher kopiert worden ist. Deadlock-Gefahr!
+		\item Drei-Phasen-Protokoll: \texttt{Request to send}, \texttt{Receiver ready}, \texttt{Message transfer}. Kann Sender- oder Empfer-initiiert worden sein
+	\end{itemize}
+	\item Blockierendes, asynchrones Message Passing: Die Daten werden vor dem Senden in einen Puffer kopiert, so dass sie vom Hauptprogramm nicht mehr verändert werden können. Dieses blockiert so lange. Receive analog
+	\item Nicht-blockierendes, asynchrones Message Passing: Die Kontrolle wird sofort an den Hauptprozess zurückgegeben, der Transfer läuft im Hintergrund. Zusätzliche Probe-Funktionen um zu prüfen, ob die Daten zum Empfänger kopiert worden sind
+	\item \textbf{Hardwareunterstützung für Message passing Protokolle}
+	\begin{itemize}
+		\item Großer Software-Overhead, daher Kopieren via DMA
+		\item Hardwareunterstützung soll die Latenz verringern und den Prozessor entlasten
+		\item Im Allgemeinen bietet das Verbindungsnetzwerke Übertragungsprimitive an
+		\item Hardwaresupport durch Kommunikationsprozessor
+	\end{itemize}
+\end{itemize}
+
+\subsection{Fallstudien}
+\begin{itemize}
+	\item \textbf{IBM Blue Gene/L}
+	\begin{itemize}
+		\item \(2^16\) Knoten in bis zu 64 Racks, die jeweils auch als Einzelsystem organisiert werden können
+		\item Knoten über ein fünfstufiges Netzwerk verbunden. Unterste Ebene: 64x32x32 3D-Torus
+	\end{itemize}
+	\item \textbf{JUGENE: Juelicher BlueGene/P}
+	\begin{itemize}
+		\item Im Juni 2010 Nummer 5 der Top500
+		\item Gesamtleistung mit der letzten Ausgbaustufe bei über einem PF/s
+		\item Aufbau: System mit jeweils 72 Racks mit jeweils 32 NodeCards, die etwa 13,9 TF erreichen. NodeCards bestehen aus jeweils 32 ComputerCards mit je einem Quadcore-Chip (Leistung etwa 13,6GF/s)
+		\item Verbindungsnetze
+		\begin{itemize}
+			\item 3D-Torus, der alle 73728 ComputeNodes verbindet mit virtual cut-through hardware routing. 425MB/s auf allen node links (5,1GB/s insgesamt)
+			\item Collective Network (binärbaumartig organisiert) mit 850MB/s, das alle Nodes verbindet
+			\item Low Latency Global Barrier and Interrupt (sternförmig) für extrem niedrige Latenzen
+			\item 10 GBit Ethernet für externe Kommunikation
+			\item Control Network: GBit Ethernet für Managementaufgaben (Boot, Monitoring, Diagnose)
+		\end{itemize}
+	\end{itemize}
+	\item \textbf{SuperMUC im Leibnitz Rechenzentrum Garching}
+	\begin{itemize}
+		\item Distributed Memory Architecture mit Sandy-Bridge-Prozessoren mit jeweils acht multithreaded Cores
+		\item Virtual Interface Architecture (VIA) und InfiniBand
+		\begin{itemize}
+			\item Standardisiertes benutzerlevel Interface, das komplett flexibel in Hardware  oder auf dem Hostprozessor implementiert sein kann
+			\item Gegensatz zur klassichen Berkeley Socket API ist der Kernel nicht mehr in jeden Transfer eingebunden, was massiv Performance spart (Kernel als Flaschenhals)
+		\end{itemize}
+	\end{itemize}
+\end{itemize}

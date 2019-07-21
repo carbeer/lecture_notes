@@ -1,0 +1,84 @@
+\chapter{Appendix: Formelsammlung und Definitionen}
+
+\section{Grundlagen}
+\subsection{Entwurfsfragen}
+\begin{itemize}
+	\item Kosten des Dies: \(cost_{die} = \frac{cost_{wafer}}{\text{Dies pro Wafer} \cdot yield_{die}}\)
+	\item Anzahl der Dies pro Wafer: \(dpw = \frac{\pi \cdot \big(\frac{1}{2} \cdot d_{Wafer}\big)^2}{A_{die}} - \frac{\pi \cdot d_{Wafer}}{\sqrt{2 \cdot A_{die}}}\) (theoretisches Maximum abzüglich Verschnitt)
+	\item Die Yield (Ausbeute): \(yield_{die} = yield_{Wafer} \cdot \Big(1+\frac{\text{Defekte pro Flaecheneinheit} \cdot A_{die}}{\alpha}\Big)^{-\alpha}\)
+	\item Gesamtkosten eines IC: \(cost_{IC} = \frac{cost_{die}+cost_{die-test}+cost_{packaging}}{yield_{final}}\)
+\end{itemize}
+
+\subsection{Energieeffizienter Entwurf}
+\begin{itemize}
+	\item \textbf{Prozessorleistung}
+	\begin{itemize}
+		\item \(P \sim U^2 \cdot f\)
+	\end{itemize}
+	\item \textbf{Wahrscheinlichkeiten}
+	\begin{itemize}
+		\item \(\mathbb{P}_A(1) = 1 - \mathbb{P}_{\neg A}(1)\)
+		\item \(\mathbb{P}_A(1) = 1 - \mathbb{P}_A(0)\)
+		\item \(\mathbb{P}_{A \land B}(1) = \mathbb{P}_A(1) \cdot \mathbb{P}_B(1)\)
+		\item \(\mathbb{P}_{A \lor B}(1) = 1 - \mathbb{P}_{A \land B}(0) = 1 - \mathbb{P}_A(0) \cdot \mathbb{P}_B(0)\)
+	\end{itemize}
+	\item \textbf{Schaltungswahrscheinlichkeit}
+	\begin{itemize}
+		\item \(\mathbb{P}_{Ausgang}(1) = \mathbb{P}_{Eingang1}(0) \cdot \mathbb{P}_{Eingang2}(1) + \mathbb{P}_{Eingang1}(1) \cdot \mathbb{P}_{Eingang2}(0)\)
+	\end{itemize}
+	\item \textbf{CMOS}
+	\begin{itemize}
+		\item Leistungsaufnahme: \(P_{total} = P_{switching} + P_{shortcircuit} + P_{static} + P_{leakage}\)
+		\item \(P_{switching} = C_{eff} \cdot V_{dd}^2 \cdot f\) (wesentlicher Anteil am Leistungsverbrauch)
+		\item \(P_{shortcircuit} = I_{mean} \cdot V_{dd}\)
+	\end{itemize}
+	\item \textbf{Durchsatz}
+	\begin{itemize}
+		\item Maximaler Durchsatz: \(D_{max} = \frac{1}{Bedienzeit} = \frac{1}{t_{Zugriff} + t_{\text{Übertragung}}}\)
+		\item Übertragungszeit: \(t_{\text{Übertragung}} = \frac{\text{Größe der Übertragung}}{Bandbreite}\)
+	\end{itemize}
+\end{itemize}
+
+\subsection{Bewertung der Leistungsfähigkeit eines Rechners}
+\begin{itemize}
+	\item Gesamtausführungzeit (Gesetz von Amdahl): \(T(n) = T(1) \cdot a + T(n) \cdot \frac{1-a}{n}\), \(a\): Anteil des Programms, der nur sequentiell ausgeführt werden kann
+	\item Für \(n \rightarrow \infty:S(n)=\frac{1}{a}\)
+	\item Beschleunigung: \(S(n) = \frac{T(1)}{T(n)} = \frac{T(1)}{T(1) \cdot \frac{1-a}{n}+T(1) \cdot a} = \frac{1}{\frac{1-a}{n}+1}\)
+	\item Effiziens: \(E(n) = \frac{\text{Beschleunigung}}{\text{Anzahl der Kerne}} = \frac{S(n)}{n}\), \(E \le 1\)
+	\item Parallelindex: \(I(n) = \frac{\text{Anzahl an Operationen}}{\text{Parallelgesamtausfuehrungszeit}} = \frac{P(n)}{T(n)}\)
+	\item Auslastung: \(U(n) = \frac{I(n)}{n}\)
+	\item Mehraufwand für die Parallelisierung: \(R(n) = \frac{P(n)}{P(1)}\)
+	\item \(MFLOPS = \frac{Anzahl~ausgefuehrter~Gleitkommainstruktionen}{10^6 \cdot Ausfuehrungszeit}\)
+	\item IC (instruction count): Anzahl der ausgeführten Befehle
+	\item C (cyles): Anzahl der ausgeführten Zyklen
+	\item Ausführungszeit: \(T_{exe} = \frac{\text{Anzahl an Zyklen}}{Prozessortakt} = \frac{C}{f}\)
+	\item Clock cycles per instruction (CPI, mittlere Anzahl Taktzyklen pro Befehl): \(CPI = \frac{\text{CPU time}}{\text{instruction count } \cdot \text{ machine cycle time}} = \frac{T_{exe}}{IC \cdot TC}\)
+	\item Instructions per cycle (IPC): \(IPC = \frac{1}{CPI}\)
+	\item Taktfrequenz: \(f = \frac{IC \cdot IPC}{T}\), niedrigerer Takt bedeutet niedrigere Leistungsaufnahme, da \(P \sim f\)
+	\item \(SPEC_{ratio} = \frac{Referenzsystem}{Testsystem}\), quantifiziert die Geschwindigkeit eines Rechensystems
+	\item \(SPEC_{rate}\) quantifiziert den Durchsatz eines Rechensystems
+	\item Gesetz von Little: \(\text{Mittlere Anzahl an Aufträgen} = \text{Durchsatz} \cdot \text{Antwortzeit}\)
+\end{itemize}
+
+\subsection{Zuverlässigkeit und Fehlertoleranz}
+\begin{itemize}
+	\item Allgemeine Formel zur Berechnung der Zuverlässigkeit: \(\phi^n_m = \sum_{k=n}^m \Big(\begin{array}{c}m\\k\end{array}\Big) \cdot \phi(K)^k \cdot \big(1-\phi(K)\big)^{m-k}\)
+	\item Zuverlässigkeitsberechnung mit Mehrheitsentscheider \(V\): \(\phi^n_m = \phi(V) \cdot \sum_{k=n}^m \Big(\begin{array}{c}m\\k\end{array}\Big) \cdot \phi(K)^k \cdot \big(1-\phi(K)\big)^{m-k}\)
+	\item Punktverfügbarkeit: \(V = \frac{\text{Mittlere Funktionszeit}}{\text{Mittlere Funktionszeit} + \text{Mittlere Reparaturzeit}} = \frac{MTTF}{MTTF + MTTR}\)
+	\item \textbf{Berechnen von \(\lambda\) mit gegebener mittlerer Lebensdauer}
+	\begin{itemize}
+		\item Gegeben: Überlebenswahrscheinlichkeit \(R(S,t)\) eines Gesamtsystems, Überlebenswahrscheinlichkeit \(R(t)\) einer Komponente sowie mittlere Lebensdauer
+		\item Berechne \(\int_0^{\infty}R(S,t)dt= \text{mittlere Lebensdauer}\)
+	\end{itemize}
+\end{itemize}
+
+
+\section{Verbindungsstrukturen}
+\begin{itemize}
+	\item Übertragungszeit = Startzeit + Transferzeit: \(T_{msg} = t_s + t_w\)
+	\item Bisektionslinie: Teilt das Netzwerk in zwei gleiche Hälften
+	\item Bisektionsbandbreite: Maximale Anzahl vom Megabytes pro Sekunde, die das Netzwerk über die Bisektionslinie transportieren kann
+	\item Diameter (Durchmesser): Maximale Distanz zweier Prozessoren oder Anzahl der Verbindugen, die durchlaufen werden müssen oder maximale Pfadlänge zwichen zwei Knoten
+	\item Verbindungsgrad eines Knoten: Anzahl der Direktverbindungen zu anderen Knoten
+	\item Mittlere Distanz zwischen zwei Knoten: Anzahl der Links auf dem kürzesten Pfad zwischen den beiden Knoten
+\end{itemize}
