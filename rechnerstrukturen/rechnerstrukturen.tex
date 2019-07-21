@@ -556,12 +556,12 @@ In modernen Prozessoren werden Maschinenbefehle in mehreren Verarbeitungsschritt
 	\item \textbf{Vorgehen zum Verhindern von Konflikten}
 	\begin{itemize}
 		\item Read-after-Write: Der Prozessor verfolgt, wann Operanden zur Verfügung stehen
-		\item Write-after-Read und Write-after-Write: Nutzung von \textit{Reservation Stations}, die Registerinhalte zwischenspeichert und so vor vorzeitigem Überschreiben schützt
+		\item Write-after-Read und Write-after-Write: Nutzung von \textit{Reservierungstabelle/Reservation Stations}, die Registerinhalte zwischenspeichert und so vor vorzeitigem Überschreiben schützt
 	\end{itemize}
 	\item \textbf{Funktionsweise\footnote{\url{https://de.wikipedia.org/wiki/Tomasulo-Algorithmus\#Funktionsweise}}}
 	\begin{itemize}
 		\item Issue: Der Befehl an der aktuellen Position in der Operation Queue wird dekodiert und entsprechend seiner auszuführenden Operation in eine passende Reservation Station eingetragen. Operanden werden direkt aus der Registerdatei übernommen, wenn sie gültig sind. Dieser Vorgang wird als Registerumbenennung bezeichnet. Steht ein Operand noch nicht zur Verfügung, wird stattdessen die Adresse der RS eingetragen, die den Wert gerade berechnet. Ist keine passende RS frei, verbleibt der Befeht in der Operation Queue und die Zuweisung wird im nächsten Takt erneut versucht
-		\item Execute: Sobald alle Operanden in der Reservation Station zur Verfügung stehen, wird die Operation an die FU weiter gegeben und ausgeführt. Andernfalls wird der Common Data Bus auf eingehende Werte beobachtet und fehlende Operanden übernommen, wenn die Adresse der Quell-RS mit der benötigten Adresse übereinstimmt
+		\item Execute: Sobald alle Operanden in der Reservation Station zur Verfügung stehen, wird die Operation an die FU weiter gegeben und ausgeführt. Andernfalls wird der Common Data Bus/Ergebnisbusses auf eingehende Werte beobachtet und fehlende Operanden übernommen, wenn die Adresse der Quell-RS mit der benötigten Adresse übereinstimmt
 		\item Write Result: Sobald das Ergebnis der Operation berechnet wurde, wird es mitsamt der Adresse der ausgeführten RS auf den Common Data Bus gelegt und somit für die RS sichtbar, welche auf das Ergebnis warten
 	\end{itemize}
 \end{itemize}
@@ -572,9 +572,9 @@ In modernen Prozessoren werden Maschinenbefehle in mehreren Verarbeitungsschritt
 	\item Die Zuordnung erfolgt dynamisch durch die Hardware
 	\item Es kann mehr als ein Befehl zugewiesen werden. Die Anzahl der zugewiesenen Befehle pro Takt wird dynamisch von der Hardware bestimmt und liegt zwischen Null und der maximalen Zuordnungsbreite
 	\item Komplexe Hardwarelogik für dynamische Zuweisung notwendig
-	\item Mehrere, von einander unabhängige Funktionsanweisungen verfügbar
+	\item Mehrere, voneinander unabhängige Funktionsanweisungen verfügbar
 	\item Mikroarchitektur, da der Befehlssatz nicht verändert wird. Technisch gesehen "`nur"' eine Erweiterung der Pipeline
-	\item \textbf{Formen}\footnote{\url{https://de.wikipedia.org/wiki/Superskalarit\%C3\%A4t}}
+	\item \textbf{FYI: Formen}\footnote{\url{https://de.wikipedia.org/wiki/Superskalarit\%C3\%A4t}}
 	\begin{itemize}
 		\item Superskalare Prozessoren mit statischem Scheduling: Die Anzahl der pro CPU-Zyklus parallel ausführbaren Befehle ist nicht vorgegeben, sondern wird durch die CPU dynamisch bestimmt. Da es sich um statisches Scheduling handelt, wird die Reihenfolge der Befehle vom Compiler vorgegeben
 		\item Superskalare Prozessoren mit dynamischem Scheduling: Die CPU bestimmt sowohl, welche Befehle parallel ausgeführt werden, als auch die Reihenfolge, in der dies geschieht (Out-of-order execution)
@@ -585,9 +585,9 @@ In modernen Prozessoren werden Maschinenbefehle in mehreren Verarbeitungsschritt
 \subsubsection{Very Long Instruction Word (VLIW)}
 \begin{itemize}
 	\item Ziel: Beschleunigen der Abarbeitung durch Parallelität auf Befehlsebene
-	\item Breites Befehlsformat, das in mehrere Felder aufgeteilt ist, aus denen die Funktionseinheiten gesteuert werden
+	\item Breites Befehlsformat, das in mehrere Felder aufgeteilt ist, aus denen die Funktionseinheiten (EX) gesteuert werden
 	\item Eine VLIW-Architektur mit \texttt{n} unabhängigen Funktionseinheiten kann bis zu \texttt{n} Operationen gleichzeitig ausführen
-	\item RISC-Architektur
+	\item Operationen ähnlich zu Befehlssätzen in RISC-Architektur
 	\item Steuerung der parallelen Abarbeitung zur Übersetzungszeit (automatisch parallelisierender Compiler). Der Compiler gruppiert die Befehle, die parallel ausgeführt werden können
 	\item Die Gruppengröße ist abhängig von der Anzahl der Ausführungseinheiten
 	\item Vorteil gegenüber superskalaren Prozessoren: Weniger Hardware-Logik notwendig \(\rightarrow\) mehr Platz auf dem Chip für zusätzliche Funktionalität bei beispielsweise mehr Ausführungseinheiten
@@ -597,7 +597,7 @@ In modernen Prozessoren werden Maschinenbefehle in mehreren Verarbeitungsschritt
 
 \paragraph{Statische Steuerung der parallelen Abarbeitung}
 \begin{itemize}
-	\item Zusätzliche Aufgaben für den Compiler: Kontrollflussanalyse, Datenflussanalyse, Datenabhängigkeitsanalyse, Schleifenparallelisierung, Scheduling (Beispiel auf Folie 94)
+	\item Zusätzliche Aufgaben für den Compiler: Code-Generierung (Kontrollflussanalyse, Datenflussanalyse, Datenabhängigkeitsanalyse), Schleifenparallelisierung, Scheduling (Beispiel auf Folie 8-33)
 	\item Software-Pipelining: Technik zur Reorganisation von Schleifen. Jede Iteration im generierten Code enthält Befehle aus verschiedenen Iterationen der ursprünglichen Stufe
 \end{itemize}
 
@@ -607,12 +607,11 @@ In modernen Prozessoren werden Maschinenbefehle in mehreren Verarbeitungsschritt
 	\item Ziel: Parallele Ausführung mehrerer Kontrollfäden
 	\item \textbf{Ansätze}
 	\begin{itemize}
-		\item Interleaved Multithreading (cycle-by-cycle): In jedem Zyklus wird ein Befehl aus einem anderen Kontrollfaden geholt und ausgeführt
-		\item Blocked Multithreading: Die Befehle eines Threads werden solange ausgeführt bis ein Ereignis eintritt, das eine lange Wartezeit nach sich zieht
-		\item Simultaneous Multithreading: Die Ausführungseinheiten werden über eine Zuordnungseinheit aus mehreren Befehlspuffern versorgt. Jeder Befehlspuffer stellt einen anderen Befehlsstrom dar und hat einen eigenen Registersatz zugeordnet
+		\item Interleaved Multithreading (cycle-by-cycle): In jedem Zyklus wird ein Befehl aus einem anderen Kontrollfaden geholt und ausgeführt. Problem: Wenn Thread ohne Wartezeiten ausgeführt werden könnte, ist er mit dieser Technik deutlich langsamer
+		\item Blocked Multithreading: Die Befehle eines Threads werden solange ausgeführt bis ein Ereignis eintritt, das eine lange Wartezeit nach sich zieht. Bearbeitung daher nicht so stark verlangsamt, die Pipeline muss jedoch bei Wechsel geleert und neugestartet werden, das ist nur bei langen Wartezeiten sinnvoll
+		\item Simultaneous Multithreading: Mehrfach superskalar, die Ausführungseinheiten werden über eine Zuordnungseinheit aus mehreren Befehlspuffern versorgt. Jeder Befehlspuffer stellt einen anderen Befehlsstrom dar und hat einen eigenen Registersatz zugeordnet. Trade-off zwischen Geschwindigkeit pro Thread und Durchsatz an Threads.
 	\end{itemize}
 \end{itemize}
-
 
 
 \section{Multiprozessoren - Parallelismus auf Prozess-/Blockebene}
